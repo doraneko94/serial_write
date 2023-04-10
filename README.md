@@ -1,6 +1,6 @@
 # serial_write
 
-Simplifying serial output in a no_std environment, both string and numeric.
+Simplifying serial output in a `no_std` environment, both string and numeric.
 
 ## List of possible output types
 
