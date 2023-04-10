@@ -42,11 +42,3 @@ writer.writeln_usize(123, &mut serial);
 // Output to 2 decimal places ("12.34").
 writer.write_usize(12.3456, 2, &mut serial);
 ```
-
-```rust
-// Set the USB bus
-let usb_bus = UsbBusAllocator::new(hal::usb::UsbBus::new(...));
-
-// Set the serial port
-let mut serial = SerialPort::new(&usb_bus);
-```
