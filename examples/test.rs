@@ -1,4 +1,4 @@
-//! 
+//! Output tests for each numeric type.
 
 #![no_std]
 #![no_main]
@@ -8,7 +8,6 @@ use rp2040_hal as hal;
 use hal::pac;
 use rp2040_hal::clocks::Clock;
 
-use usb_device::class_prelude::{UsbBus, UsbError};
 use usb_device::{class_prelude::*, prelude::*};
 use usbd_serial::SerialPort;
 
@@ -149,19 +148,87 @@ fn main() -> ! {
             "-340282350000000000000000000000000000000.0 [f32]: ",
             f32::MIN, 1, write_f32, writer, serial
         );
-        write_check_float!(
-            "0.00000011920929 [f32]: ",
-            f32::EPSILON, 7, write_f32, writer, serial
-        );
-        write_check_float!(
-            "179769313486231570000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.0 [f32]: ",
-            f64::MAX, 1, write_f64, writer, serial
-        );
-        write_check_float!(
-            "-179769313486231570000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.0 [f32]: ",
-            f64::MIN, 1, write_f64, writer, serial
-        );
+        for (i, &s) in [
+            "0.0 [f32]: ", "0.00 [f32]: ", "0.000 [f32]: ", "0.0000 [f32]: ", 
+            "0.00000 [f32]: ", "0.000000 [f32]: ", "0.0000001 [f32]: "
+            ].iter().enumerate() 
+        {
+            write_check_float!(s, f32::EPSILON, i+1, write_f32, writer, serial);
+        }
+        let _ = writer.writeln_str("===============================================", &mut serial);
+        
+        for _ in 0..200 {
+            delay.delay_ms(5);
+            let _ = usb_dev.poll(&mut [&mut serial]);
+        }
 
+        let _ = writer.writeln_str("===============================================", &mut serial);
+        write_check_float!(
+            " 3.4028235e038 [f32]: ",
+            f32::MAX, 7, write_f32_exp, writer, serial
+        );
+        write_check_float!(
+            "-3.4028235e038 [f32]: ",
+            f32::MIN, 7, write_f32_exp, writer, serial
+        );
+        for (i, &s) in [
+            " 1.1e-07 [f32]: ", " 1.19e-07 [f32]: ", " 1.192e-07 [f32]: ", " 1.1920e-07 [f32]: ", 
+            " 1.19209e-07 [f32]: ", " 1.192092e-07 [f32]: ", " 1.1920929e-07 [f32]: ",
+            ].iter().enumerate() 
+        {
+            write_check_float!(s, f32::EPSILON, i+1, write_f32_exp, writer, serial);
+        }
+        let _ = writer.writeln_str("===============================================", &mut serial);
+        
+        for _ in 0..200 {
+            delay.delay_ms(5);
+            let _ = usb_dev.poll(&mut [&mut serial]);
+        }
+
+        let _ = writer.writeln_str("===============================================", &mut serial);
+        write_check_float!(
+            " 1.7976931348623157e308 [f64]: ",
+            f64::MAX, 16, write_f64_exp, writer, serial
+        );
+        write_check_float!(
+            "-1.7976931348623157e308 [f64]: ",
+            f64::MIN, 16, write_f64_exp, writer, serial
+        );
+        for (i, &s) in [
+            " 2.2e-16 [f64]: ", " 2.22e-16 [f64]: ", " 2.220e-16 [f64]: ", " 2.2204e-16 [f64]: ", " 2.22044e-16 [f64]: ", " 2.220446e-16 [f64]: ", 
+            " 2.2204460e-16 [f64]: ", " 2.22044604e-16 [f64]: ", " 2.220446049e-16 [f64]: ", " 2.2204460492e-16 [f64]: ", " 2.22044604925e-16 [f64]: ", 
+            " 2.220446049250e-16 [f64]: ", " 2.2204460492503e-16 [f64]: ", " 2.22044604925031e-16 [f64]: ", " 2.220446049250313e-16 [f64]: "
+
+            ].iter().enumerate() 
+        {
+            write_check_float!(s, f64::EPSILON, i+1, write_f64_exp, writer, serial);
+        }
+        let _ = writer.writeln_str("===============================================", &mut serial);
+
+        for _ in 0..200 {
+            delay.delay_ms(5);
+            let _ = usb_dev.poll(&mut [&mut serial]);
+        }
+        
+        let _ = writer.writeln_str("===============================================", &mut serial);
+        write_check!(
+            "[ 1, 23, 456, 7890, ] [ [usize] ]: ",
+            &[1, 23, 456, 7890], write_usize_slice, writer, serial
+        );
+        write_check_float!(
+            "[ 1.00, 23.45, 678.90, ] [ [f32] ]: ",
+            &[1.0, 23.45, 678.901], 2, write_f32_slice, writer, serial
+        );
+        write_check_float!(
+            "[  1.00e000,  2.34e001,  6.78e002, ] [ [f32] ]: ",
+            &[1.0, 23.45, 678.901], 2, write_f32_slice_exp, writer, serial
+        );
+        let _ = writer.writeln_str("===============================================", &mut serial);
+
+        loop {
+            delay.delay_ms(5);
+            let _ = usb_dev.poll(&mut [&mut serial]);
+        }
     }
 }
 
